@@ -5,6 +5,13 @@ import tetris.Board;
 import tetris.Move;
 import tetris.Piece;
 import AIHelper.*;
+/**
+  *Author: Kelvin Zhang & Everyone in my team
+  *My design is loop through the next piece as well,
+  *I generate those coefficients using a finder.
+  *
+  *
+*/
 
 public class AmityAI2 implements AI {
 	FinalRater boardRater = new FinalRater();
@@ -12,7 +19,7 @@ public class AmityAI2 implements AI {
 			0.1420172532064692, -0.13881428312611474, 0.22970827267905328,
 			-0.052368130931930074, 0.5712789822642919, 0.2851778629665227,
 			0.041534211381371554, -0.011738293785449829, 0.241299661945633,
-			0, // 0.8292064267563932,
+			0, // 0.8292064267563932, i put zero here because the AverageSquare rater is wrong so cancel it out by put a zero here.
 			-0.009937763420971586 };
 	public static BoardRater myrater[] = 
 	{ new ConsecHorzHoles(), 
@@ -30,8 +37,8 @@ public class AmityAI2 implements AI {
 		new BlocksAboveHoles() };
 
 	public AmityAI2() {
-		boardRater.coefficients = this.coefficients;
-		FinalRater.raters = AmityAI2.myrater;
+		boardRater.coefficients = this.coefficients; //set coefficients
+		FinalRater.raters = AmityAI2.myrater; //Just reset the order of the raters, make sure it correspond to the right coefficients.
 	}
 
 	public Move bestMove(Board board, Piece piece, Piece nextPiece,
@@ -44,7 +51,7 @@ public class AmityAI2 implements AI {
                 Piece current = piece;
                 Piece next = nextPiece;
 
-                // loop through all the rotations
+                // loop through all the rotations for current piece
                 do {
                         final int yBound = limitHeight - current.getHeight()+1;
                         final int xBound = board.getWidth() - current.getWidth()+1;
@@ -57,13 +64,13 @@ public class AmityAI2 implements AI {
                                         testBoard.place(current, x, y);
                                         testBoard.clearRows();
 
-                                                // Everything in this while loop evaluates possible moves with the next piece
+                                                  // Embed another loop does the same thing to nextPiece,
                                                 do
                                                 {
                                                         final int jBound = limitHeight - next.getHeight()+1;
                                                         final int iBound = testBoard.getWidth() - next.getWidth()+1;
                                                         
-                                                        for(int i = 0; i < iBound; i++)
+                                                        for(int i = 0; i < iBound; i++)//for next piece, try out all the location.
                                                         {
                                                                 int j = testBoard.dropHeight(next, i);
                                                                 if(j < jBound && testBoard.canPlace(next, i, j)) {
@@ -72,7 +79,7 @@ public class AmityAI2 implements AI {
                                                                         temp.clearRows();
                                                                                 
                                                                                 double nextScore = boardRater.rateBoard(temp);
-                                                                                score += this.rate(temp);
+                                                                                score += this.rate(temp);//use my own rater to rate the board.
                                                                                 if(nextScore < bestScore)
                                                                                 {
                                                                                         bestScore = nextScore;
@@ -121,7 +128,7 @@ public class AmityAI2 implements AI {
 	}
 
 	public void setRater(BoardRater r) {
-		return;
+		return; // does not support yet!
 	}
 
 	public String toString() {
