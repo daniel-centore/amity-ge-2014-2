@@ -36,46 +36,68 @@ public class AmityAI2 implements AI {
 
 	public Move bestMove(Board board, Piece piece, Piece nextPiece,
 			int limitHeight) {
-		double bestScore = 1e20;
-		int bestX = 0;
-		int bestY = 0;
-		Piece bestPiece = piece;
-		Piece current = piece;
+                double bestScore = 1e20;
+                int bestX = 0;
+                int bestY = 0;
+                Piece bestPiece = piece;
+                
+                Piece current = piece;
+                Piece next = nextPiece;
 
-		// loop through all the rotations
-		do {
-			final int yBound = limitHeight - current.getHeight() + 1;
-			final int xBound = board.getWidth() - current.getWidth() + 1;
+                // loop through all the rotations
+                do {
+                        final int yBound = limitHeight - current.getHeight()+1;
+                        final int xBound = board.getWidth() - current.getWidth()+1;
 
-			// For current rotation, try all the possible columns
-			for (int x = 0; x < xBound; x++) {
-				int y = board.dropHeight(current, x);
-				
-				if ((y < yBound) && board.canPlace(current, x, y)) {
-					Board testBoard = new Board(board);
-					testBoard.place(current, x, y);
-					testBoard.clearRows();
+                        // For current rotation, try all the possible columns
+                        for (int x = 0; x<xBound; x++) {
+                                int y = board.dropHeight(current, x);
+                                if ((y<yBound) && board.canPlace(current, x, y)) {
+                                        Board testBoard = new Board(board);
+                                        testBoard.place(current, x, y);
+                                        testBoard.clearRows();
 
-					double score = boardRater.rateBoard(testBoard);
-					score = score + this.rate(testBoard);
-					if (score < bestScore) {
-						bestScore = score;
-						bestX = x;
-						bestY = y;
-						bestPiece = current;
-					}
-				}
-			}
+                                                // Everything in this while loop evaluates possible moves with the next piece
+                                                do
+                                                {
+                                                        final int jBound = limitHeight - next.getHeight()+1;
+                                                        final int iBound = testBoard.getWidth() - next.getWidth()+1;
+                                                        
+                                                        for(int i = 0; i < iBound; i++)
+                                                        {
+                                                                int j = testBoard.dropHeight(next, i);
+                                                                if(j < jBound && testBoard.canPlace(next, i, j)) {
+                                                                        Board temp = new Board(testBoard);
+                                                                        temp.place(next, i, j);
+                                                                        temp.clearRows();
+                                                                                
+                                                                                double nextScore = boardRater.rateBoard(temp);
+                                                                                score += this.rate(temp);
+                                                                                if(nextScore < bestScore)
+                                                                                {
+                                                                                        bestScore = nextScore;
+                                                                                        bestX = x;
+                                                                                        bestY = y;
+                                                                                        bestPiece = current;
+                                                                                }
+                                                                        }
 
-			current = current.nextRotation();
-		} while (current != piece);
+                                                                }
 
-		Move move = new Move();
-		move.x = bestX;
-		move.y = bestY;
-		move.piece = bestPiece;
-		return (move);
+                                                        next = next.nextRotation();
+                                                } while (next != nextPiece);
+                                                // Back out to the current piece
 
+                                        }
+                                }
+                        current = current.nextRotation();
+                } while (current != piece);
+
+                Move move = new Move();
+                move.x=bestX;
+                move.y=bestY;
+                move.piece=bestPiece;
+                return(move);
 	}
 
 	public double rate(Board board) {
