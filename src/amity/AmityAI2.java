@@ -1,26 +1,109 @@
 package amity;
 
-import AIHelper.BoardRater;
 import tetris.AI;
 import tetris.Board;
 import tetris.Move;
 import tetris.Piece;
+import AIHelper.*;
 
-public class AmityAI2 implements AI
-{
+public class AmityAI2 implements AI {
+	FinalRater boardRater = new FinalRater();
+	public double[] coefficients = { 0.41430724103382527, 0.04413383739389207,
+			0.1420172532064692, -0.13881428312611474, 0.22970827267905328,
+			-0.052368130931930074, 0.5712789822642919, 0.2851778629665227,
+			0.041534211381371554, -0.011738293785449829, 0.241299661945633,
+			0, // 0.8292064267563932,
+			-0.009937763420971586 };
+	public static BoardRater myrater[] = 
+	{ new ConsecHorzHoles(), 
+		new HeightAvg(), 
+		new HeightMax(),
+		new HeightMinMax(), 
+		new HeightVar(), 
+		new HeightStdDev(),
+		new SimpleHoles(), 
+		new ThreeVariance(), 
+		new Through(),
+		new WeightedHoles(), 
+		new RowsWithHolesInMostHoledColumn(),
+		new AverageSquaredTroughHeight(),
+		new BlocksAboveHoles() };
 
-	@Override
-	public Move bestMove(Board board, Piece piece, Piece nextPiece, int limitHeight)
-	{
-		// TODO Auto-generated method stub
-		return null;
+	public AmityAI2() {
+		boardRater.coefficients = this.coefficients;
+		FinalRater.raters = AmityAI2.myrater;
 	}
 
-	@Override
-	public void setRater(BoardRater r)
-	{
-		// TODO Auto-generated method stub
-		
+	public Move bestMove(Board board, Piece piece, Piece nextPiece,
+			int limitHeight) {
+		double bestScore = 1e20;
+		int bestX = 0;
+		int bestY = 0;
+		Piece bestPiece = piece;
+		Piece current = piece;
+
+		// loop through all the rotations
+		do {
+			final int yBound = limitHeight - current.getHeight() + 1;
+			final int xBound = board.getWidth() - current.getWidth() + 1;
+
+			// For current rotation, try all the possible columns
+			for (int x = 0; x < xBound; x++) {
+				int y = board.dropHeight(current, x);
+				
+				if ((y < yBound) && board.canPlace(current, x, y)) {
+					Board testBoard = new Board(board);
+					testBoard.place(current, x, y);
+					testBoard.clearRows();
+
+					double score = boardRater.rateBoard(testBoard);
+					score = score + this.rate(testBoard);
+					if (score < bestScore) {
+						bestScore = score;
+						bestX = x;
+						bestY = y;
+						bestPiece = current;
+					}
+				}
+			}
+
+			current = current.nextRotation();
+		} while (current != piece);
+
+		Move move = new Move();
+		move.x = bestX;
+		move.y = bestY;
+		move.piece = bestPiece;
+		return (move);
+
+	}
+
+	public double rate(Board board) {
+		int w = board.getWidth();
+		int[] troughs = new int[w];
+		int x = 0, temp, temp2, temp3;
+		troughs[0] = ((temp = board.getColumnHeight(1)
+				- board.getColumnHeight(0)) > 0) ? temp : 0;
+		for (x = 1; x < w - 1; x++) {
+			troughs[x] = (temp = (((temp2 = (board.getColumnHeight(x + 1) - board
+					.getColumnHeight(x))) > (temp3 = (board
+					.getColumnHeight(x - 1) - board.getColumnHeight(x)))) ? temp3
+					: temp2)) > 0 ? temp : 0;
+		}
+		troughs[w - 1] = ((temp = board.getColumnHeight(w - 2)
+				- board.getColumnHeight(w - 1)) > 0) ? temp : 0;
+		double average = 0.0;
+		for (x = 0; x < w; x++)
+			average += troughs[x] * troughs[x];
+		return average / w * 0.8292064267563932;
+	}
+
+	public void setRater(BoardRater r) {
+		return;
+	}
+
+	public String toString() {
+		return "AmityAi2";
 	}
 
 }
