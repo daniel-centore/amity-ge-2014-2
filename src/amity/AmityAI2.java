@@ -16,15 +16,15 @@ import AIHelper.*;
 public class AmityAI2 implements AI {
 	FinalRater boardRater = new FinalRater();
  public double[] coefficients = {0.3873903606334963, 
- -0.04585633721581077, 
+ 0.04585633721581077, 
  0.09445581478240499, 
- -0.07473365052873632, 
+ 0.07473365052873632, 
  0.07482815637667657,
- -0.11868667604426739, 
+ 0.11868667604426739, 
  0.4262318925468999, 
  0.3515108914987468, 
  0.34084080219176627, 
- -0.09047581309278363, 
+ 0.09047581309278363, 
  0.27597446034724027, 
  0, //0.8614281749606392, 
  0.03335335871335531};
@@ -53,7 +53,7 @@ public class AmityAI2 implements AI {
 			int limitHeight) {
 		double bestScore = 1e20;
 		int bestX = 0;
-		int bestY = 0;
+		int bestY = 0;.
 		Piece bestPiece = piece;
 		Piece current = piece;
 
