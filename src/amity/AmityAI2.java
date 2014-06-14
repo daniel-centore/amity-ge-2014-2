@@ -53,7 +53,7 @@ public class AmityAI2 implements AI {
 			int limitHeight) {
 		double bestScore = 1e20;
 		int bestX = 0;
-		int bestY = 0;.
+		int bestY = 0;
 		Piece bestPiece = piece;
 		Piece current = piece;
 
