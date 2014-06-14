@@ -12,8 +12,8 @@ public class Main
 {
 	public static void main(String args[])
 	{
-		RunTetris.load(new ITLPAI());
-		// RunTetris.load(new AmityAI());
+		//RunTetris.load(new ITLPAI());
+		RunTetris.load(new AmityAI());
 	}
 
 }
